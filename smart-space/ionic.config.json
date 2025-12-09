@@ -1,0 +1,8 @@
+{
+  "name": "smart space",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite",
+  "id": "74ba626d"
+}
