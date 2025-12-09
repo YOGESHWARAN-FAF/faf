@@ -1,21 +1,28 @@
 workflows:
-  react-native-android:
-    name: React Native — Android
+  ionic-android:
+    name: Ionic — Android
     max_build_duration: 60
     environment:
       node: "lts/*"
       java: openjdk11
       os: ubuntu-22.04
+    cache:
+      paths:
+        - ~/.npm
     scripts:
       - name: Install dependencies
         script: |
           npm ci
 
-      - name: Install Android SDK licenses
+      - name: Build Ionic web assets
         script: |
-          yes | sdkmanager --licenses || true
+          npm run build
 
-      - name: Build Android (release)
+      - name: Sync Capacitor Android
+        script: |
+          npx cap sync android || true
+
+      - name: Build Android (Gradle)
         script: |
           cd android
           ./gradlew assembleRelease
@@ -24,8 +31,8 @@ workflows:
       - android/app/build/outputs/**/*.apk
 
   # Optional: iOS workflow (uncomment and run on macOS runners when needed)
-  # react-native-ios:
-  #   name: React Native — iOS
+  # ionic-ios:
+  #   name: Ionic — iOS
   #   environment:
   #     node: "lts/*"
   #     cocoapods: default
@@ -34,9 +41,12 @@ workflows:
   #     - name: Install dependencies
   #       script: |
   #         npm ci
+  #     - name: Build web assets
+  #       script: |
+  #         npm run build
   #     - name: Install Pods
   #       script: |
   #         cd ios && pod install --repo-update
   #     - name: Build iOS (archive)
   #       script: |
-  #         xcodebuild -workspace ios/YourApp.xcworkspace -scheme YourApp -configuration Release -sdk iphoneos -archivePath $PWD/build/YourApp.xcarchive archive
+  #         xcodebuild -workspace ios/App.xcworkspace -scheme App -configuration Release -sdk iphoneos -archivePath $PWD/build/App.xcarchive archive
