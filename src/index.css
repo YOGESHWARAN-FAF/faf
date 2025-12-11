@@ -2,81 +2,374 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-
-button:hover {
-  border-color: #646cff;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    /* Deep Blue Theme */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 199 89% 48%;
+    /* Cyan/Blue like the logo usually is */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 17%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.5rem;
   }
 
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-image: radial-gradient(at 0% 0%, hsla(222, 47%, 15%, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(199, 89%, 20%, 0.5) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(222, 47%, 15%, 1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(199, 89%, 20%, 0.5) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
-/* Global Transition */
-* {
-  transition: all 0.15s ease-in-out;
+@layer components {
+  .app {
+    @apply min-h-screen flex flex-col text-foreground;
+    background: transparent;
+  }
+
+  .main-content {
+    @apply flex-1 pt-16 px-4 pb-8 transition-all duration-300;
+  }
+
+  /* Topbar */
+  .topbar {
+    @apply fixed top-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-md border-b border-border z-40 flex items-center justify-between px-4 shadow-sm;
+  }
+
+  .topbar-left {
+    @apply flex items-center gap-4;
+  }
+
+  .brand-container {
+    @apply flex items-center gap-3;
+  }
+
+  .brand-logo {
+    @apply h-8 w-8 object-contain rounded-full;
+  }
+
+  .brand-title {
+    @apply text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent hidden sm:block;
+  }
+
+  .topbar-right {
+    @apply flex items-center gap-4;
+  }
+
+  .status-badge {
+    @apply flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border;
+  }
+
+  .status-badge.online {
+    @apply bg-green-500/10 text-green-500 border-green-500/20;
+  }
+
+  .status-badge.offline {
+    @apply bg-red-500/10 text-red-500 border-red-500/20;
+  }
+
+  /* Sidebar */
+  .sidebar-overlay {
+    @apply fixed inset-0 bg-black/50 z-40 lg:hidden;
+  }
+
+  .sidebar {
+    @apply fixed top-0 left-0 bottom-0 w-64 bg-card border-r border-border z-50 flex flex-col shadow-xl;
+  }
+
+  .sidebar-header {
+    @apply h-16 flex items-center justify-between px-4 border-b border-border;
+  }
+
+  .sidebar-brand {
+    @apply flex items-center gap-3;
+  }
+
+  .sidebar-logo {
+    @apply h-8 w-8 object-contain rounded-full;
+  }
+
+  .sidebar-nav {
+    @apply flex-1 py-6 px-3 space-y-1 overflow-y-auto;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground transition-colors hover:text-foreground hover:bg-accent;
+  }
+
+  .sidebar-link.active {
+    @apply bg-primary/10 text-primary font-medium;
+  }
+
+  /* Page Layout */
+  .page {
+    @apply max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500;
+  }
+
+  .page-header {
+    @apply flex items-center justify-between mb-8;
+  }
+
+  .page-header h1 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+  .container {
+    @apply mx-auto px-4;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20;
+  }
+
+  .btn-text {
+    @apply hover:bg-accent hover:text-accent-foreground;
+  }
+
+  .btn-icon {
+    @apply p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors;
+  }
+
+  .btn-icon-text {
+    @apply gap-2;
+  }
+
+  /* Grid & Cards */
+  .venues-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .empty-state {
+    @apply col-span-full flex flex-col items-center justify-center py-12 text-center text-muted-foreground bg-card/50 rounded-xl border border-dashed border-border;
+  }
+
+  /* Forms */
+  .form-group {
+    @apply space-y-2 mb-4;
+  }
+
+  .form-group label {
+    @apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
+  }
+
+  .form-group input,
+  .form-group select {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .modal-actions {
+    @apply flex justify-end gap-3 mt-6;
+  }
+
+  /* Cards */
+  .card {
+    @apply rounded-xl border border-white/10 bg-card/60 backdrop-blur-md text-card-foreground shadow-lg p-6 transition-all duration-300 hover:shadow-primary/5 hover:border-primary/30;
+  }
+
+  .form-card {
+    @apply max-w-md mx-auto;
+  }
+
+  /* Venue Card */
+  .venue-card {
+    @apply cursor-pointer hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between h-40;
+  }
+
+  .venue-info h3 {
+    @apply text-xl font-semibold mb-1;
+  }
+
+  .venue-info p {
+    @apply text-muted-foreground text-sm;
+  }
+
+  .venue-actions {
+    @apply flex justify-end gap-2;
+  }
+
+  /* Device Card */
+  .device-card {
+    @apply flex flex-col gap-4;
+  }
+
+  .device-header {
+    @apply flex items-center justify-between;
+  }
+
+  .device-icon {
+    @apply p-2 rounded-lg bg-primary/10 text-primary;
+  }
+
+  .device-info {
+    @apply flex-1 ml-3;
+  }
+
+  .device-info h4 {
+    @apply font-medium leading-none;
+  }
+
+  .device-type {
+    @apply text-xs text-muted-foreground mt-1 block;
+  }
+
+  .device-controls {
+    @apply mt-2;
+  }
+
+  .btn-toggle {
+    @apply w-full py-2 rounded-lg font-medium transition-all bg-secondary text-secondary-foreground hover:bg-secondary/80;
+  }
+
+  .btn-toggle.active {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20;
+  }
+
+  .slider-container {
+    @apply flex items-center gap-3;
+  }
+
+  .slider {
+    @apply flex-1 h-2 bg-secondary rounded-full appearance-none cursor-pointer accent-primary;
+  }
+
+  .slider-value {
+    @apply w-12 text-right font-mono text-sm;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200;
+  }
+
+  .modal-content {
+    @apply bg-card text-card-foreground rounded-xl border border-border shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-200 overflow-hidden;
+  }
+
+  .modal-header {
+    @apply flex items-center justify-between p-6 border-b border-border;
+  }
+
+  .modal-header h3 {
+    @apply text-lg font-semibold;
+  }
+
+  .modal-close {
+    @apply p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors;
+  }
+
+  .modal-body {
+    @apply p-6;
+  }
+
+  /* Button Groups & Utilities */
+  .button-group {
+    @apply flex items-center gap-3 mt-6;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+  }
+
+  .btn-icon.danger {
+    @apply hover:bg-destructive/10 hover:text-destructive;
+  }
+
+  .btn-icon.sm {
+    @apply p-1.5;
+  }
+
+  /* Venue Page */
+  .page-header.with-back {
+    @apply flex items-center justify-start gap-4;
+  }
+
+  .back-btn {
+    @apply -ml-2;
+  }
+
+  .devices-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  /* Docs Page */
+  .page-container {
+    @apply max-w-4xl mx-auto px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500;
+  }
+
+  .docs-header {
+    @apply mb-10 text-center;
+  }
+
+  .docs-header h2 {
+    @apply text-3xl font-bold mb-2;
+  }
+
+  .docs-header p {
+    @apply text-muted-foreground;
+  }
+
+  .docs-content {
+    @apply space-y-10;
+  }
+
+  .docs-section h3 {
+    @apply text-xl font-semibold mb-4 flex items-center gap-2 text-primary;
+  }
+
+  .docs-section p {
+    @apply mb-4 leading-relaxed text-muted-foreground;
+  }
+
+  .docs-section ul,
+  .docs-section ol {
+    @apply list-disc list-inside space-y-2 ml-4 text-muted-foreground;
+  }
+
+  .docs-section ol {
+    @apply list-decimal;
+  }
+
+  .code-block-container {
+    @apply relative mt-4 rounded-lg overflow-hidden border border-border bg-muted/50;
+  }
+
+  .copy-btn {
+    @apply absolute top-2 right-2 p-2 rounded-md bg-background/50 hover:bg-background text-muted-foreground hover:text-foreground transition-colors backdrop-blur-sm border border-border/50;
+  }
+
+  .code-block {
+    @apply p-4 overflow-x-auto text-sm font-mono text-foreground;
+  }
 }

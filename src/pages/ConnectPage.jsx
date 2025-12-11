@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 
 const ConnectPage = () => {
   const navigate = useNavigate();
-  const { espConfig, setEspConfig, addToast, setIsConnected, safeFetch } = useSmartSpace();
+  const { espConfig, setEspConfig, addToast, setIsConnected, checkConnection } = useSmartSpace();
   const [ip, setIp] = useState(espConfig.ip || '');
   const [port, setPort] = useState(espConfig.port || '80');
   const [loading, setLoading] = useState(false);
@@ -34,31 +34,15 @@ const ConnectPage = () => {
     setLoading(true);
     setStatusMessage('Checking connection...');
 
-    const cleanIP = ip.replace(/^https?:\/\//, '').replace(/\/$/, '');
-    const cleanPort = port.toString().replace(/[^0-9]/g, '');
-    const url = `http://${cleanIP}:${cleanPort}/ping`;
+    const connected = await checkConnection(ip, port);
 
-    const res = await safeFetch(url);
-
-    if (res === 'pong' || (res && res.message === 'pong')) {
-      // Success
-      addToast('Connection successful!', 'success');
+    if (connected) {
       setStatusMessage('Connected! ✔');
-      setIsConnected(true);
-
+      // Auto-save is handled in checkConnection via setEspConfig, but we ensure local storage matches
       localStorage.setItem('lastIp', ip);
       localStorage.setItem('lastPort', port);
-
-      setEspConfig({
-        ...espConfig,
-        ip: cleanIP,
-        port: cleanPort,
-        isOnline: true,
-        lastCheckedAt: new Date().toISOString()
-      });
     } else {
       setStatusMessage('Connection failed');
-      setIsConnected(false);
     }
     setLoading(false);
   };

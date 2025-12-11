@@ -127,12 +127,51 @@ function reducer(state, action) {
 export const SmartSpaceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Load initial state from storage
-  useEffect(() => {
-    const venues = getVenues();
-    const espConfig = getEspConfig();
-    dispatch({ type: ACTIONS.INIT_STATE, payload: { venues, espConfig } });
-  }, []);
+  const checkConnection = async (ip, port) => {
+    if (!ip || !port) return false;
+
+    const cleanIP = ip.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    const cleanPort = port.toString().replace(/[^0-9]/g, '');
+    const url = `http://${cleanIP}:${cleanPort}/ping`;
+
+    try {
+      const res = await safeFetch(url, { method: 'GET', signal: AbortSignal.timeout(2000) }); // 2s timeout
+      if (res === 'pong' || (res && res.message === 'pong')) {
+        const newConfig = {
+          ip: cleanIP,
+          port: cleanPort,
+          isOnline: true,
+          lastCheckedAt: new Date().toISOString()
+        };
+        setEspConfig(newConfig);
+        setIsConnected(true);
+        return true;
+      }
+    } catch (e) {
+      console.error("Auto-connect failed", e);
+    }
+
+    setIsConnected(false);
+    setEspConfig((prev) => ({ ...prev, isOnline: false }));
+    return false;
+  };
+
+  const safeFetch = async (url, options = {}) => {
+    try {
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error('Request failed');
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return text;
+      }
+    } catch (err) {
+      // Don't show toast for background auto-connect failures unless explicitly requested
+      // addToast("Device is not connected", "error"); 
+      return null;
+    }
+  };
 
   const addVenue = (name) => {
     const newVenue = {
@@ -189,21 +228,20 @@ export const SmartSpaceProvider = ({ children }) => {
     dispatch({ type: ACTIONS.REMOVE_TOAST, payload: id });
   };
 
-  const safeFetch = async (url, options = {}) => {
-    try {
-      const res = await fetch(url, options);
-      if (!res.ok) throw new Error('Request failed');
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch {
-        return text;
-      }
-    } catch (err) {
-      addToast("Device is not connected", "error");
-      return null;
+  // Load initial state and auto-connect
+  useEffect(() => {
+    const venues = getVenues();
+    const espConfig = getEspConfig();
+    dispatch({ type: ACTIONS.INIT_STATE, payload: { venues, espConfig } });
+
+    if (espConfig.ip && espConfig.port) {
+      checkConnection(espConfig.ip, espConfig.port).then(connected => {
+        if (connected) {
+          addToast('Auto-connected to Smart Space', 'success');
+        }
+      });
     }
-  };
+  }, []);
 
   const sendCommand = async (venueId, deviceName, params) => {
     if (!state.isConnected) {
@@ -244,6 +282,7 @@ export const SmartSpaceProvider = ({ children }) => {
         removeToast,
         safeFetch,
         sendCommand,
+        checkConnection,
       }}
     >
       {children}
